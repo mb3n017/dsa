@@ -9,7 +9,7 @@ use JSON;
 my $server = $ARGV[0];
 my $port = "5554";
 my $endpoint = $server.":".$port;
-my $userpass = "s0dsibm:?maxime0!";
+my $userpass = "admin:admin";
 
 my $currentDomain = $ARGV[1];
 my $uri = "/mgmt/status/$currentDomain/ObjectStatus";
