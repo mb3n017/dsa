@@ -7,7 +7,7 @@ use JSON;
 # Configurables
 $hostaddress = $ARGV[0];
 $endpoint = $hostaddress.":5554";
-$userpass = "s0dsibm:?maxime0!";
+$userpass = "admin:admin";
 
 $uri = "/mgmt/status/default/ObjectStatus";
 
