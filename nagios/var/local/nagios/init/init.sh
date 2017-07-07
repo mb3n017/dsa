@@ -1,13 +1,36 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]
+function usage(){
+        printf "Usage :\n"
+        printf "\t-n   : DataPower name ;\n"
+        printf "\t-d   : DataPower address;\n"
+        printf "\t-h   : Display this message.\n"
+}
+
+if [ $# -eq 0 ]
 then
-	echo "Usage - $0 datapower_name datapower_address"
-	exit 1
+        usage
 fi
 
-datapower_name=$1
-datapower_address=$2
+while getopts "n:d:" opt; do
+  case $opt in
+    n)
+      datapower_name="$OPTARG"
+      ;;
+    d)
+      datapower_address="$OPTARG"
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
 
 #########################################
 #step 1 - modifier fichier de conf nagios
@@ -18,10 +41,10 @@ echo "[1][INFO] Check nagios.cfg"
 isfirstinit=`grep dsa /opt/nagios/etc/nagios.cfg`
 if [ "$isfirstinit" = "" ]
 then
-	echo "[1][INFO] Add /var/local/nagios/dsa to nagios.cfg"
-	echo "cfg_dir=/var/local/nagios/dsa" >> /opt/nagios/etc/nagios.cfg
+        echo "[1][INFO] Add /var/local/nagios/dsa to nagios.cfg"
+        echo "cfg_dir=/var/local/nagios/dsa" >> /opt/nagios/etc/nagios.cfg
 else
-	echo "[1][INFO] nagios.cfg already setup"
+        echo "[1][INFO] nagios.cfg already setup"
 fi
 
 #########################################
@@ -35,28 +58,28 @@ replacefile="yes"
 if [ -f "$FILE" ]
 then
 
-	read -p $FILE" Already exists, do you wish to replace this file ? [Yy|Nn] " yn
-	case $yn in
-		[Yy]* ) rm $FILE; replacefile="yes";;
-		[Nn]* ) replacefile="no";;
-		* ) echo "Please answer yes or no.";;
-	esac
+        read -p $FILE" Already exists, do you wish to replace this file ? [Yy|Nn] " yn
+        case $yn in
+                [Yy]* ) rm $FILE; replacefile="yes";;
+                [Nn]* ) replacefile="no";;
+                * ) echo "Please answer yes or no.";;
+        esac
 
 fi
 
 if [ "$replacefile" = "yes" ]
 then
-	echo "[2][INFO] Create "$FILE
-	cat <<EOF >$FILE
+        echo "[2][INFO] Create "$FILE
+        cat <<EOF >$FILE
 define host{
-		use					 dsa-server
-		host_name			   dsa
-		alias				   DSA XI52 VAL/DEV/INF
-		address				 dsa
+                use                                      dsa-server
+                host_name                          dsa
+                alias                              DSA XI52 VAL/DEV/INF
+                address                          dsa
 }
 EOF
 else
-	echo "[2][INFO] "$FILE "unmodified"
+        echo "[2][INFO] "$FILE "unmodified"
 fi
 
 #########################################
@@ -71,29 +94,29 @@ HG_FILE="/var/local/nagios/dsa/datapower_hostgroup.cfg"
 
 if [ $isfirstmember = "#" ]
 then
-	echo "[3][INFO] "$datapower_name" is the first member"
-	cat <<EOF1 >$HG_FILE
+        echo "[3][INFO] "$datapower_name" is the first member"
+        cat <<EOF1 >$HG_FILE
 define hostgroup{
-		hostgroup_name  dsa
-		alias		   DataPower
-		members		 $datapower_name
+                hostgroup_name  dsa
+                alias              DataPower
+                members          $datapower_name
 }
 
 EOF1
 
 else
-	memberexists=`grep $datapower_name $HG_FILE`
-	if [ "$memberexists" != "" ]
-	then
-		echo "[3][INFO] "$datapower_name" already in member list"
-	else
-		cat <<EOF2 >$HG_FILE
+        memberexists=`grep $datapower_name $HG_FILE`
+        if [ "$memberexists" != "" ]
+        then
+                echo "[3][INFO] "$datapower_name" already in member list"
+        else
+                cat <<EOF2 >$HG_FILE
 define hostgroup{
-		hostgroup_name  dsa
-		alias		   DataPower
+                hostgroup_name  dsa
+                alias              DataPower
 $members,$datapower_name
 }
 
 EOF2
-	fi
+        fi
 fi
