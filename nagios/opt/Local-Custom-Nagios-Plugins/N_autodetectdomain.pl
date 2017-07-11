@@ -48,13 +48,15 @@ my $r = decode_json( $client->responseContent() );
 
 my $resp = $r->{domain};
 
-if($resp->{name} eq "default"){
-        find_match("default");
-}else {
-        for ( my $i = 0 ; $i < ( scalar @{$resp} ) ; $i++ ) {
-                my $domainName = $resp->[$i]{name};
-                find_match($domainName);
-        }
+if (ref($resp) eq "HASH") {
+    if($resp->{name} eq "default"){
+            find_match("default");
+    }
+}else{
+    for ( my $i = 0 ; $i < ( scalar @{$resp} ) ; $i++ ) {
+            my $domainName = $resp->[$i]{name};
+            find_match($domainName);
+    }
 }
 
 ################################################################################
